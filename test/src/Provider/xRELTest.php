@@ -2,6 +2,7 @@
 
 namespace xREL\OAuth2\Client\Test\Provider;
 
+use GuzzleHttp\Psr7\Response;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
@@ -27,6 +28,11 @@ class xRELTest extends TestCase
             'clientSecret'  => 'mock_secret',
             'redirectUri'   => 'none',
         ]);
+    }
+
+    private function createJsonResponse($body, $status = 200)
+    {
+        return new Response($status, ['content-type' => 'application/json'], $body);
     }
 
     public function tearDown(): void
@@ -78,10 +84,9 @@ class xRELTest extends TestCase
 
     public function testGetAccessToken()
     {
-        $response = m::mock('Psr\Http\Message\ResponseInterface');
-        $response->shouldReceive('getBody')->andReturn('{"access_token":"mock_access_token","expires_in":3600,"token_type":"bearer","refresh_token":"mock_refresh_token"}');
-        $response->shouldReceive('getHeader')->andReturn(['content-type' => 'json']);
-        $response->shouldReceive('getStatusCode')->andReturn(200);
+        $response = $this->createJsonResponse(
+            '{"access_token":"mock_access_token","expires_in":3600,"token_type":"bearer","refresh_token":"mock_refresh_token"}'
+        );
 
         $client = m::mock('GuzzleHttp\ClientInterface');
         $client->shouldReceive('send')->times(1)->andReturn($response);
@@ -102,15 +107,13 @@ class xRELTest extends TestCase
         $name = uniqid();
         $avatar = uniqid();
 
-        $postResponse = m::mock('Psr\Http\Message\ResponseInterface');
-        $postResponse->shouldReceive('getBody')->andReturn('{"access_token":"mock_access_token","expires_in":3600,"token_type":"bearer","refresh_token":"mock_refresh_token"}');
-        $postResponse->shouldReceive('getHeader')->andReturn(['content-type' => 'json']);
-        $postResponse->shouldReceive('getStatusCode')->andReturn(200);
+        $postResponse = $this->createJsonResponse(
+            '{"access_token":"mock_access_token","expires_in":3600,"token_type":"bearer","refresh_token":"mock_refresh_token"}'
+        );
 
-        $userResponse = m::mock('Psr\Http\Message\ResponseInterface');
-        $userResponse->shouldReceive('getBody')->andReturn('{"id":"'.$userId.'","name":"'.$name.'","avatar_url":"'.$avatar.'"}');
-        $userResponse->shouldReceive('getHeader')->andReturn(['content-type' => 'json']);
-        $userResponse->shouldReceive('getStatusCode')->andReturn(200);
+        $userResponse = $this->createJsonResponse(
+            '{"id":"'.$userId.'","name":"'.$name.'","avatar_url":"'.$avatar.'"}'
+        );
 
         $client = m::mock('GuzzleHttp\ClientInterface');
         $client->shouldReceive('send')
@@ -137,15 +140,14 @@ class xRELTest extends TestCase
         $message = uniqid();
         $status = rand(400, 600);
 
-        $postResponse = m::mock('Psr\Http\Message\ResponseInterface');
-        $postResponse->shouldReceive('getBody')->andReturn('{"access_token":"mock_access_token","expires_in":3600,"token_type":"bearer","refresh_token":"mock_refresh_token"}');
-        $postResponse->shouldReceive('getHeader')->andReturn(['content-type' => 'json']);
-        $postResponse->shouldReceive('getStatusCode')->andReturn(200);
+        $postResponse = $this->createJsonResponse(
+            '{"access_token":"mock_access_token","expires_in":3600,"token_type":"bearer","refresh_token":"mock_refresh_token"}'
+        );
 
-        $userResponse = m::mock('Psr\Http\Message\ResponseInterface');
-        $userResponse->shouldReceive('getBody')->andReturn('{"error_type":"api","error":"'.$error.'","error_description":"'.$message.'"}');
-        $userResponse->shouldReceive('getHeader')->andReturn(['content-type' => 'json']);
-        $userResponse->shouldReceive('getStatusCode')->andReturn($status);
+        $userResponse = $this->createJsonResponse(
+            '{"error_type":"api","error":"'.$error.'","error_description":"'.$message.'"}',
+            $status
+        );
 
         $client = m::mock('GuzzleHttp\ClientInterface');
         $client->shouldReceive('send')
