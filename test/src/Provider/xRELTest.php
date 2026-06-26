@@ -3,10 +3,11 @@
 namespace xREL\OAuth2\Client\Test\Provider;
 
 use Mockery as m;
+use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use xREL\OAuth2\Client\Provider\xREL;
 
-class xRELTest extends \PHPUnit_Framework_TestCase
+class xRELTest extends TestCase
 {
     protected $provider;
 
@@ -19,7 +20,7 @@ class xRELTest extends \PHPUnit_Framework_TestCase
         return $method;
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->provider = new xREL([
             'clientId'      => 'mock_client_id',
@@ -28,7 +29,7 @@ class xRELTest extends \PHPUnit_Framework_TestCase
         ]);
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         m::close();
         parent::tearDown();
@@ -55,7 +56,7 @@ class xRELTest extends \PHPUnit_Framework_TestCase
 
         $url = $this->provider->getAuthorizationUrl($options);
 
-        $this->assertContains(urlencode(implode(',', $options['scope'])), $url);
+        $this->assertStringContainsString(urlencode(implode(',', $options['scope'])), $url);
     }
 
     public function testGetAuthorizationUrl()
@@ -128,11 +129,10 @@ class xRELTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($avatar, $user->toArray()['avatar_url']);
     }
 
-    /**
-     * @expectedException League\OAuth2\Client\Provider\Exception\IdentityProviderException
-     */
     public function testExceptionThrownWhenErrorObjectReceived()
     {
+        $this->expectException('League\OAuth2\Client\Provider\Exception\IdentityProviderException');
+
         $error = uniqid();
         $message = uniqid();
         $status = rand(400, 600);
